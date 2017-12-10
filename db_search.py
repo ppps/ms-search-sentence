@@ -84,6 +84,14 @@ def row_to_string(row):
 def main():
     sentence = get_sentence()
     results = search_for_sentence(sentence)
+    if len(results) == 1:
+        # Choose this result automatically
+        title = results[0][1]
+    else:
+        # Prompt user to choose title
+        result_dict = {row_to_string(row): row[1] for row in results}
+        title = result_dict[choose_from_list(result_dict.keys())]
+    # Do something with `title` here
 
 
 if __name__ == '__main__':
