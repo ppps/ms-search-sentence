@@ -57,6 +57,7 @@ def search_for_sentence(sentence):
     order by a.date desc;
     ;
     '''
+    conn = connect_to_db()
     cur = conn.cursor()
     sql_args = (sentence,)
     cur.execute(search_query, sql_args)
@@ -82,6 +83,7 @@ def row_to_string(row):
 
 def main():
     sentence = get_sentence()
+    results = search_for_sentence(sentence)
 
 
 if __name__ == '__main__':
