@@ -46,7 +46,7 @@ def search_for_sentence(sentence):
     search_query = '''\
       select date, title
         from "20171210".articles a
-       where content_tsvector @@ phraseto_tsquery('english', %s)
+       where content_tsvector @@ phraseto_tsquery('english', %(phrase)s)
          and a.date < '2017-11-30'
          and a.date > '2017-08-20'
     order by a.date desc;
@@ -54,7 +54,7 @@ def search_for_sentence(sentence):
     '''
     with psycopg2.connect('dbname=morningstaronline user=admin') as conn:
         cur = conn.cursor()
-        sql_args = (sentence,)
+        sql_args = dict(phrase=sentence)
         cur.execute(search_query, sql_args)
         results = cur.fetchall()
     return results
