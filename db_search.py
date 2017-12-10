@@ -38,11 +38,11 @@ def connect_to_db():
 def get_sentence():
     """Fetch search sentence from argv or stdin"""
     args = docopt(__doc__)
-    print(args)
     if args['-']:
         sentence = sys.stdin.read()
     else:
         sentence = args['SENTENCE']
+    return sentence
 
 
 def search_for_sentence(sentence):
@@ -80,8 +80,9 @@ def row_to_string(row):
     return f'{date:%Y-%m-%d}: {title}'
 
 
+def main():
+    sentence = get_sentence()
+
 
 if __name__ == '__main__':
-    choose_from_list(['a', 'b', 'c', 'How about "this"?'])
-    # print(asquote('How about "this"?"'))
-    # main()
+    main()
