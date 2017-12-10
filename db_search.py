@@ -11,7 +11,6 @@ import json
 import subprocess
 import sys
 
-
 from docopt import docopt
 import psycopg2
 
@@ -54,7 +53,7 @@ def search_for_sentence(sentence):
     """Return date and title of the matches for sentence in the database"""
 
     search_query = '''\
-      select date, title
+      select date, title, summary
         from "20171210".articles a
        where content_tsvector @@ phraseto_tsquery('english', %(phrase)s)
          and a.date < '2017-11-30'
@@ -73,7 +72,7 @@ def search_for_sentence(sentence):
 def choose_from_list(string_list):
     """Prompt the user to choose and string from several and return it"""
     ascript = '''\
-tell the current application
+tell application "Safari"
 	choose from list {{ {str_list} }}
 end tell
 '''
@@ -90,15 +89,21 @@ def row_to_string(row):
 def main():
     sentence = get_sentence()
     results = search_for_sentence(sentence)
-    if len(results) == 1:
+    with open('/Users/admin/desktop/log', 'a') as f:
+        print(results, file=f)
+    if len(results) == 0:
+        title_standfirst = ['Title not found', '']
+    elif len(results) == 1:
         # Choose this result automatically
-        title = results[0][1]
+        title_standfirst = results[0][1:]
     else:
         # Prompt user to choose title
-        result_dict = {row_to_string(row): row[1] for row in results}
-        title = result_dict[choose_from_list(result_dict.keys())]
-    print(title)
-    # Do something with `title` here
+        result_dict = {row_to_string(row): row[1:] for row in results}
+        title_standfirst = result_dict[choose_from_list(result_dict.keys())]
+    # Print the title - either to the command line
+    # or to a calling Applescript function
+    title_standfirst = [s.strip() for s in title_standfirst]
+    print('|'.join(title_standfirst), end='')
 
 
 if __name__ == '__main__':
