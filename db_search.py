@@ -20,7 +20,11 @@ def asrun(ascript):
     osa = subprocess.Popen(['osascript', '-'],
                            stdin=subprocess.PIPE,
                            stdout=subprocess.PIPE)
-    return osa.communicate(ascript.encode('utf-8'))[0].decode('utf8')
+    result = osa.communicate(ascript.encode('utf-8'))[0].decode('utf8')
+    if result[-1] == '\n':
+        return result[:-1]
+    else:
+        return result
 
 
 def asquote(astr):
