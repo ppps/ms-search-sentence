@@ -35,6 +35,12 @@ def asquote(astr):
     return '"{}"'.format(astr)
 
 
+def parse_code_units_json(string):
+    """Parse a JSON string containing an array of code units"""
+    code_units = json.loads(string)
+    return ''.join([chr(c) for c in code_units])
+
+
 def get_sentence():
     """Fetch search sentence from argv or stdin"""
     args = docopt(__doc__)
@@ -42,8 +48,8 @@ def get_sentence():
         sentence = sys.stdin.read()
     elif args['-j']:
         # Code units from javascript
-        code_units = json.loads(sys.stdin.read())
-        sentence = ''.join([chr(c) for c in code_units])
+        raw = sys.stdin.read()
+        sentence = parse_code_units_json(raw)
     else:
         sentence = args['SENTENCE']
     return sentence
@@ -86,11 +92,9 @@ def row_to_string(row):
     return f'{date:%Y-%m-%d}: {title}'
 
 
-def main():
-    sentence = get_sentence()
+def lookup_title_for_sentence(sentence):
+    """Returns a list of titles if sentence is found in the database"""
     results = search_for_sentence(sentence)
-    with open('/Users/admin/desktop/log', 'a') as f:
-        print(results, file=f)
     if len(results) == 0:
         title_standfirst = ['Title not found', '']
     elif len(results) == 1:
@@ -100,11 +104,17 @@ def main():
         # Prompt user to choose title
         result_dict = {row_to_string(row): row[1:] for row in results}
         title_standfirst = result_dict[choose_from_list(result_dict.keys())]
-    # Print the title - either to the command line
-    # or to a calling Applescript function
-    title_standfirst = [s.strip() for s in title_standfirst]
-    print('|'.join(title_standfirst), end='')
+
+    # Strip whitespace and escape quotes
+    title_standfirst = [s.strip().replace('"', r'\"')
+                        for s in title_standfirst]
+    return title_standfirst
+
+
+def main(sentence):
+    title_standfirst = lookup_title_for_sentence(sentence)
+    return '|'.join(title_standfirst)
 
 
 if __name__ == '__main__':
-    main()
+    print(main(get_sentence()), end='')
