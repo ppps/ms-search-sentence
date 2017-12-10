@@ -3,9 +3,11 @@
 
 Usage:
     db_search [-]
+    db_search [-j]
     db_search SENTENCE
 """
 
+import json
 import subprocess
 import sys
 
@@ -39,6 +41,10 @@ def get_sentence():
     args = docopt(__doc__)
     if args['-']:
         sentence = sys.stdin.read()
+    elif args['-j']:
+        # Code units from javascript
+        code_units = json.loads(sys.stdin.read())
+        sentence = ''.join([chr(c) for c in code_units])
     else:
         sentence = args['SENTENCE']
     return sentence
@@ -91,6 +97,7 @@ def main():
         # Prompt user to choose title
         result_dict = {row_to_string(row): row[1] for row in results}
         title = result_dict[choose_from_list(result_dict.keys())]
+    print(title)
     # Do something with `title` here
 
 
