@@ -30,11 +30,6 @@ def asquote(astr):
     return '"{}"'.format(astr)
 
 
-def connect_to_db():
-    conn_str = 'dbname=morningstaronline user=admin'
-    return psycopg2.connect(conn_str)
-
-
 def get_sentence():
     """Fetch search sentence from argv or stdin"""
     args = docopt(__doc__)
@@ -57,11 +52,12 @@ def search_for_sentence(sentence):
     order by a.date desc;
     ;
     '''
-    conn = connect_to_db()
-    cur = conn.cursor()
-    sql_args = (sentence,)
-    cur.execute(search_query, sql_args)
-    return cur.fetchall()
+    with psycopg2.connect('dbname=morningstaronline user=admin') as conn:
+        cur = conn.cursor()
+        sql_args = (sentence,)
+        cur.execute(search_query, sql_args)
+        results = cur.fetchall()
+    return results
 
 
 def choose_from_list(string_list):
